@@ -6,8 +6,7 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
 
-import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, ExecutionContextExecutor, Future}
+import scala.concurrent.ExecutionContextExecutor
 import scala.util.{Failure, Success, Try}
 
 object HttpServerRoutingMinimal {
@@ -28,16 +27,24 @@ object HttpServerRoutingMinimal {
 						}
 					}
 
-				val f = for {
-					_ <- Http().newServerAt(host, port).bind(route)
-					waitOnFuture  <- Future.never
-				} yield waitOnFuture
+				val binding = Http().newServerAt(host, port).bind(route)
+
+				binding.onComplete {
+					case Success(binding) =>
+						val address = binding.localAddress
+						system.log.info(
+							"Server running at {}:{}",
+							address.getHostString,
+							address.getPort
+						)
+					case Failure(ex) =>
+						system.log.error("Failed to bind server, terminating system", ex)
+						system.terminate()
+				}
 
 				sys.addShutdownHook {
 					println(" Au revoir!")
 				}
-
-				Await.ready(f, Duration.Inf)
 		}
 	}
 }
