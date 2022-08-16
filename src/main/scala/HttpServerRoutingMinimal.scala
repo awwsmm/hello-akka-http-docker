@@ -6,8 +6,8 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
 
-import scala.concurrent.ExecutionContextExecutor
-import scala.io.StdIn
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, ExecutionContextExecutor, Future}
 import scala.util.{Failure, Success, Try}
 
 object HttpServerRoutingMinimal {
@@ -28,14 +28,16 @@ object HttpServerRoutingMinimal {
 						}
 					}
 
-				val bindingFuture = Http().newServerAt(host, port).bind(route)
+				val f = for {
+					_ <- Http().newServerAt(host, port).bind(route)
+					waitOnFuture  <- Future.never
+				} yield waitOnFuture
 
-				println(s"Server now online. Please navigate to http://$host:$port/hello\nPress RETURN to stop...")
+				sys.addShutdownHook {
+					println(" Au revoir!")
+				}
 
-				StdIn.readLine() // let it run until user presses return
-				bindingFuture
-					.flatMap(_.unbind()) // trigger unbinding from the port
-					.onComplete(_ => system.terminate()) // and shutdown when done
+				Await.ready(f, Duration.Inf)
 		}
 	}
 }
