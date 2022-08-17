@@ -45,13 +45,13 @@ You can also run the `jar` outside the `sbt` shell with
 
 Build and tag the Docker image with
 
-`$ docker build -t akka-http-docker:my-tag` .
+`$ docker build -t akka-http-docker:my-tag .`
 
 ### run
 
 Then, run with
 
-`$ docker run -d -p 9999:8888 akka-http-docker:my-tag 0.0.0.0 8888`
+`$ docker run -dit -p 9999:8888 akka-http-docker:my-tag 0.0.0.0 8888`
 
 Communicate with the container using the same command (and host, `localhost`) as above
 
