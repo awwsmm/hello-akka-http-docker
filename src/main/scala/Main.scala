@@ -10,7 +10,7 @@ import scala.concurrent.ExecutionContextExecutor
 import scala.io.StdIn
 import scala.util.{Failure, Success, Try}
 
-object HttpServerRoutingMinimal {
+object Main {
 
 	def main(args: Array[String]): Unit = {
 
